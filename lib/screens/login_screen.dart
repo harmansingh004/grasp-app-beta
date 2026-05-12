@@ -22,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> loginUser() async {
     setState(() => loading = true);
 
-    final url = Uri.parse("http://10.0.2.2:3000/api/auth/login");
+    final url = Uri.parse("http://10.23.145.89:3000/api/auth/login");
 
     try {
       final res = await http.post(
@@ -36,11 +36,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final data = jsonDecode(res.body);
 
-      if (res.statusCode == 200) {
-        await storage.write(key: "accessToken", value: data["accessToken"]);
-        await storage.write(key: "refreshToken", value: data["refreshToken"]);
-        await storage.write(key: "userEmail", value: data["email"]);
-        await storage.write(key: "userName", value: data["name"]);
+      if (res.statusCode == 200 && data["success"] == true) {
+        final token = data["data"]["accessToken"];
+        final user = data["data"]["user"];
+
+        await storage.write(key: "accessToken", value: token);
+        await storage.write(key: "userEmail", value: user["email"]);
+        await storage.write(key: "userName", value: user["name"]);
+        await storage.write(key: "userId", value: user["id"]);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login successful")),
@@ -51,10 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (_) => const MainWrapper()),
               (route) => false,
         );
-
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["msg"] ?? "Login failed")),
+          SnackBar(content: Text(data["error"] ?? "Login failed")),
         );
       }
     } catch (e) {

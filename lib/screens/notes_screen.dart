@@ -28,11 +28,26 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   Future<void> loadNotes() async {
-    final data = await NoteService.getNotes();
-    setState(() {
-      notes = data;
-      loading = false;
-    });
+    setState(() => loading = true);
+
+    try {
+      final data = await NoteService.getNotes();
+
+      if (!mounted) return;
+
+      setState(() {
+        notes = data;
+        loading = false;
+      });
+
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        notes = [];
+        loading = false;
+      });
+    }
   }
 
   Future<void> pickFile() async {

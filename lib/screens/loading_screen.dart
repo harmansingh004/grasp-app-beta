@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lottie/lottie.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/course_model.dart';
+import '../services/api_service.dart';
 import 'course_screen.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -15,7 +15,6 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  final http.Client _client = http.Client();
   final storage = const FlutterSecureStorage();
   bool _isCancelled = false;
   int _attemptCount = 0;
@@ -28,7 +27,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   void dispose() {
-    _client.close();
     super.dispose();
   }
 
@@ -61,35 +59,25 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   Future<bool> _generateCourse() async {
     try {
-      final url = Uri.parse('http://10.0.2.2:3000/generate_course');
-      String? token = await storage.read(key: "accessToken");
-      final response = await _client.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode({"topic": widget.topic}),
-      ).timeout(const Duration(seconds: 60));
+      final course = await ApiService.generateCourse(widget.topic, context);
 
       if (_isCancelled) return false;
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final course = Course.fromJson(data);
-
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => CourseScreen(course: course)),
-          );
-        }
-        return true;
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CourseScreen(course: course),
+          ),
+        );
       }
+
+      return true;
+
     } catch (e) {
       print("Attempt $_attemptCount failed: $e");
+      return false;
     }
-    return false;
   }
 
   Future<void> _handleBackPress() async {
@@ -113,7 +101,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     if (shouldStop == true) {
       _isCancelled = true;
-      _client.close();
       if (mounted) Navigator.pop(context);
     }
   }

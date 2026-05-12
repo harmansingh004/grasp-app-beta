@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:flutter_markdown/flutter_markdown.dart'; // REQUIRED: Import this
 import '../models/course_model.dart';
 
 class ChapterScreen extends StatefulWidget {
@@ -90,7 +90,6 @@ class _ChapterScreenState extends State<ChapterScreen> {
               ),
 
             const SizedBox(height: 25),
-
             MarkdownBody(
               data: widget.chapter.content,
               selectable: true,

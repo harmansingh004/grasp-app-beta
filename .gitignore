@@ -1,6 +1,7 @@
 # Node
 node_modules/
-.env
+lib/backend-node/.env
+
 
 # Flutter
 .dart_tool/

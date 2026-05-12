@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/course_model.dart';
+import '../widgets/ask_ai_dialog.dart';
+import 'ai_chat_screen.dart';
 import 'chapter_screen.dart';
 import 'quiz_screen.dart';
 import '../services/pdf_service.dart';
@@ -19,6 +21,12 @@ class CourseScreen extends ConsumerStatefulWidget {
 
 class _CourseScreenState extends ConsumerState<CourseScreen> {
 
+  String buildCourseContext() {
+    return widget.course.chapters
+        .map((ch) => "${ch.title}\n${ch.content}")
+        .join("\n\n");
+  }
+
   double get _progress {
     if (widget.course.chapters.isEmpty) return 0.0;
     int completed = widget.course.chapters.where((c) => c.isCompleted).length;
@@ -34,7 +42,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
     });
 
     try {
-      final url = Uri.parse('http://10.0.2.2:3000/chapters/${chapter.id}/toggle');
+      final url = Uri.parse('http://10.23.145.89:3000/chapters/${chapter.id}/toggle');
 
       await http.put(
         url,
@@ -58,6 +66,21 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
       appBar: AppBar(
         title: Text(widget.course.topic),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.smart_toy),
+            onPressed: () {
+              final contextText = buildCourseContext();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AIChatScreen(
+                    courseContent: contextText,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
             onPressed: () {

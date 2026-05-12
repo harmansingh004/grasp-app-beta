@@ -44,7 +44,7 @@ class Chapter {
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? 'Untitled',
 
-      content: json['content_text'] ?? json['content_markdown'] ?? '',
+      content: json['content_text'] ?? '',
 
       videoId: json['video_id'] ?? '',
       cheatSheet: json['cheat_sheet_text'] ?? '',

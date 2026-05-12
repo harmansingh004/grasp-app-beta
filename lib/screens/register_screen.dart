@@ -18,7 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool loading = false;
   bool obscure = true;
 
-  final baseUrl = "http://10.0.2.2:3000/api/auth/register";
+  final baseUrl = "http://10.23.145.89:3000/api/auth/register";
 
   bool isValidEmail(String email) {
     return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
@@ -59,21 +59,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       final data = jsonDecode(res.body);
 
-      if (res.statusCode == 200 || res.statusCode == 201) {
+      if ((res.statusCode == 200 || res.statusCode == 201) &&
+          data["success"] == true) {
+
+        setState(() => loading = false);
+
         showMsg("Registered! Login now", success: true);
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
+
       } else {
+        setState(() => loading = false);
         showMsg(data["error"] ?? "Register failed");
       }
+
     } catch (e) {
       showMsg("Server error");
     }
 
-    setState(() => loading = false);
+    if (mounted) {
+      setState(() => loading = false);
+    }
   }
 
   void showMsg(String msg, {bool success = false}) {

@@ -1,6 +1,5 @@
 import 'package:Grasp/screens/login_screen.dart';
 import 'package:Grasp/screens/notes_screen.dart';
-import 'package:Grasp/services/idle_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'screens/home_screen.dart';
@@ -26,37 +25,13 @@ class _MainWrapperState extends State<MainWrapper> {
     const NotesScreen(),
     const SettingsScreen(),
   ];
-  void autoLogout() async {
-    await storage.deleteAll();
 
-    if (!mounted) return;
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    IdleService.start(autoLogout);
-  }
-  void dispose() {
-    IdleService.stop();
-    super.dispose();
-  }
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final navColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final borderColor = isDark ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () => IdleService.reset(autoLogout),
-      onPanDown: (_) => IdleService.reset(autoLogout),
-      child: Scaffold(
+    return Scaffold(
         extendBody: true,
         body: _screens[_selectedIndex],
 
@@ -88,7 +63,6 @@ class _MainWrapperState extends State<MainWrapper> {
             ),
           ),
         ),
-      ),
     );
   }
 

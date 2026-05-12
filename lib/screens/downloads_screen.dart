@@ -16,12 +16,12 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   @override
   void initState() {
     super.initState();
-    _future = ApiService.getCourseHistory();
+    _future = ApiService.getCourseHistory(context);
   }
 
   Future<void> _refresh() async {
     setState(() {
-      _future = ApiService.getCourseHistory();
+      _future = ApiService.getCourseHistory(context);
     });
   }
 
@@ -33,7 +33,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     );
 
     try {
-      final chapters = await ApiService.getCourseChapters(course.id);
+      final chapters = await ApiService.getCourseChapters(course.id, context);
 
       final fullCourse = Course(
         id: course.id,

@@ -1,7 +1,7 @@
-import 'package:Grasp/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../services/api_service.dart';
+
+import '../screens/login_screen.dart';
 import 'main_wrapper.dart';
 
 class AuthGate extends StatefulWidget {
@@ -13,6 +13,7 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   final storage = const FlutterSecureStorage();
+
   bool loading = true;
   bool loggedIn = false;
 
@@ -23,20 +24,12 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> checkLogin() async {
-    String? refreshToken = await storage.read(key: "refreshToken");
-    print("REFRESH TOKEN FROM STORAGE: $refreshToken");
+    String? token = await storage.read(key: "accessToken");
 
-    if (refreshToken != null) {
-      print("Trying silent refresh...");
-      String? newToken = await ApiService.refreshAccessToken();
-
-      print("NEW ACCESS TOKEN: $newToken");
-
-      if (newToken != null) {
-        loggedIn = true;
-      } else {
-        loggedIn = false;
-      }
+    if (token != null) {
+      loggedIn = true;
+    } else {
+      loggedIn = false;
     }
 
     setState(() => loading = false);

@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/course_model.dart';
+import '../services/auth_service.dart';
 import 'course_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<HistoryScreen> createState() => HistoryScreenState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class HistoryScreenState extends State<HistoryScreen> {
   late Future<List<Course>> _historyFuture;
 
   @override
   void initState() {
     super.initState();
-    _historyFuture = ApiService.getCourseHistory();
+    _historyFuture = ApiService.getCourseHistory(context);
   }
 
-  Future<void> _refreshHistory() async {
+  Future<void> refreshHistory() async {
     setState(() {
-      _historyFuture = ApiService.getCourseHistory();
+      _historyFuture = ApiService.getCourseHistory(context);
     });
   }
 
@@ -32,7 +33,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: const Text("My Courses"),
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshHistory,
+        onRefresh: refreshHistory,
         child: FutureBuilder<List<Course>>(
           future: _historyFuture,
           builder: (context, snapshot) {
@@ -67,7 +68,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                     subtitle: const Text("Tap to continue learning"),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () => _navigateToCourse(context, course),
+                    onTap: () => navigateToCourse(context, course),
                   ),
                 );
               },
@@ -78,7 +79,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  void _navigateToCourse(BuildContext context, Course course) async {
+  void navigateToCourse(BuildContext context, Course course) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -86,7 +87,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
 
     try {
-      final chapters = await ApiService.getCourseChapters(course.id);
+      final chapters = await ApiService.getCourseChapters(course.id, context);
 
       if (mounted) Navigator.pop(context);
 
@@ -105,10 +106,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
         );
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Could not load chapters: $e")),
-      );
+      if (e.toString().contains("UNAUTHORIZED")) {
+        await AuthService.handleUnauthorized(context);
+        return;
+      }
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("$e")));
     }
   }
 }

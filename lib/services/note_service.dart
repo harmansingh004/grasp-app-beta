@@ -7,7 +7,7 @@ import '../models/notes_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class NoteService {
-  static const baseUrl = "http://10.0.2.2:3000";
+  static const baseUrl = "http://10.23.145.89:3000";
   static const storage = FlutterSecureStorage();
 
   static Future<String?> uploadNote(
